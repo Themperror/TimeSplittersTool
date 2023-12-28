@@ -3,9 +3,10 @@
 
 int main(int argc, char** argv)
 {
-	if (argc >= 4 && !strcmp(argv[2], "export"))
+	if (argc >= 4 && !strcmp(argv[1], "export"))
 	{
 		TS2Importer importer;
-		importer.Import(argv[3]);
+		importer.Import(argv[2]);
+		importer.Export(argv[2], argv[3]);
 	}
 }
