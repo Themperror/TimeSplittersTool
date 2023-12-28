@@ -4,3 +4,4 @@
 *.pch
 iso/
 *.vcxproj.user
+Intermediate/

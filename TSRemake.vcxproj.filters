@@ -13,5 +13,90 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\Tool">
+      <UniqueIdentifier>{7cf023eb-c2f0-4696-91f7-3a1bae3abdd0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Tool\TS2Importer">
+      <UniqueIdentifier>{85ea0b2a-c71b-4b26-b1b0-41da3a5e30c3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Utility">
+      <UniqueIdentifier>{5dbb30a8-cf91-4b4f-b2cf-bec5d8b272c4}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Tool\TS2Importer\TS2Mesh.cpp">
+      <Filter>Source Files\Tool\TS2Importer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Tool\TS2Importer\TS2Level.cpp">
+      <Filter>Source Files\Tool\TS2Importer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Tool\TS2Importer\TS2Skeleton.cpp">
+      <Filter>Source Files\Tool\TS2Importer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Tool\TS2Importer\TS2Texture.cpp">
+      <Filter>Source Files\Tool\TS2Importer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Tool\TS2Importer\TS2Importer.cpp">
+      <Filter>Source Files\Tool\TS2Importer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Utility\fileutils.cpp">
+      <Filter>Source Files\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Utility\print.cpp">
+      <Filter>Source Files\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Utility\stringutils.cpp">
+      <Filter>Source Files\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Utility\svars.cpp">
+      <Filter>Source Files\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Utility\timer.cpp">
+      <Filter>Source Files\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Utility\break.cpp">
+      <Filter>Source Files\Utility</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\Tool\TS2Importer\TS2Mesh.h">
+      <Filter>Source Files\Tool\TS2Importer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Tool\TS2Importer\TS2Level.h">
+      <Filter>Source Files\Tool\TS2Importer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Tool\TS2Importer\TS2Skeleton.h">
+      <Filter>Source Files\Tool\TS2Importer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Tool\TS2Importer\TS2Texture.h">
+      <Filter>Source Files\Tool\TS2Importer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Tool\TS2Importer\TS2Importer.h">
+      <Filter>Source Files\Tool\TS2Importer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Utility\fileutils.h">
+      <Filter>Source Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Utility\print.h">
+      <Filter>Source Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Utility\stringutils.h">
+      <Filter>Source Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Utility\svars.h">
+      <Filter>Source Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Utility\timer.h">
+      <Filter>Source Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Utility\break.h">
+      <Filter>Source Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="src\common.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
