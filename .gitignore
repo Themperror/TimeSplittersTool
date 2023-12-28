@@ -5,3 +5,5 @@
 iso/
 *.vcxproj.user
 Intermediate/
+out/
+x64/
