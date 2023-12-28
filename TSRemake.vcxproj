@@ -41,6 +41,7 @@
     <ClInclude Include="src\Tool\TS2Importer\TS2Texture.h" />
     <ClInclude Include="src\Utility\break.h" />
     <ClInclude Include="src\Utility\fileutils.h" />
+    <ClInclude Include="src\Utility\memoryreader.h" />
     <ClInclude Include="src\Utility\print.h" />
     <ClInclude Include="src\Utility\stringutils.h" />
     <ClInclude Include="src\Utility\svars.h" />

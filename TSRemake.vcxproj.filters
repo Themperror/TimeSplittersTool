@@ -98,5 +98,8 @@
     <ClInclude Include="src\common.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Utility\memoryreader.h">
+      <Filter>Source Files\Utility</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
