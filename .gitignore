@@ -1,0 +1,6 @@
+.vs/
+*.pdb
+*.obj
+*.pch
+iso/
+*.vcxproj.user
