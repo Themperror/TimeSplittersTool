@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="external\lodepng.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Tool\TS2Importer\TS2Importer.cpp" />
     <ClCompile Include="src\Tool\TS2Importer\TS2Level.cpp" />
@@ -33,12 +34,14 @@
     <ClCompile Include="src\Utility\timer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="external\lodepng.h" />
     <ClInclude Include="src\common.h" />
     <ClInclude Include="src\Tool\TS2Importer\TS2Importer.h" />
     <ClInclude Include="src\Tool\TS2Importer\TS2Level.h" />
     <ClInclude Include="src\Tool\TS2Importer\TS2Mesh.h" />
     <ClInclude Include="src\Tool\TS2Importer\TS2Skeleton.h" />
     <ClInclude Include="src\Tool\TS2Importer\TS2Texture.h" />
+    <ClInclude Include="src\Utility\binarywriter.h" />
     <ClInclude Include="src\Utility\break.h" />
     <ClInclude Include="src\Utility\fileutils.h" />
     <ClInclude Include="src\Utility\memoryreader.h" />
@@ -143,7 +146,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>src;src/utility;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;src/utility;$(SolutionDir);</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -160,7 +163,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>src;src/utility;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;src/utility;$(SolutionDir);</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
