@@ -15,7 +15,7 @@ namespace Utility
 		T Read()
 		{
 			constexpr size_t dataSize = sizeof(T);
-			if (offset + dataSize >= size)
+			if (offset + dataSize > size)
 			{
 				Utility::Print("MemoryReader::Read, out of bounds read: %zu / %zu", offset, size);
 				Utility::Break();
@@ -26,12 +26,25 @@ namespace Utility
 			return val;
 		}
 
+		template<typename T, std::enable_if_t<std::is_pointer_v<T>, int> = 0 >
+		void Read(T ptr, size_t numElements)
+		{
+			constexpr size_t dataSize = sizeof(std::remove_pointer_t<T>);
+			if (offset + dataSize*numElements > size)
+			{
+				Utility::Print("MemoryReader::Read, out of bounds read: %zu / %zu", offset, size);
+				Utility::Break();
+			}
+			memcpy(ptr, data + offset, dataSize*numElements);
+			offset += dataSize;
+		}
+
 		//array types (e.g: char[4])
 		template<typename T, size_t numElements, std::enable_if_t<std::is_array_v<T>, int> = 0 >
 		void Read(T(&destination)[numElements])
 		{
 			constexpr size_t dataSize = sizeof(T) * numElements;
-			if (offset + dataSize >= size)
+			if (offset + dataSize > size)
 			{
 				Utility::Print("MemoryReader::Read, out of bounds read: %zu / %zu", offset, size);
 				Utility::Break();
@@ -45,7 +58,7 @@ namespace Utility
 		void Read(U destination)
 		{
 			constexpr size_t dataSize = sizeof(T) * numElements;
-			if (offset + dataSize >= size)
+			if (offset + dataSize > size)
 			{
 				Utility::Print("MemoryReader::Read, out of bounds read: %zu / %zu", offset, size);
 				Utility::Break();
