@@ -8,8 +8,14 @@ int main(int argc, char** argv)
 		TS2Importer importer;
 		importer.PAKExtract(argv[2], argv[3]);
 	}
+	else if (argc >= 4 && !strcmp(argv[1], "converttex"))
+	{
+		TS2Importer importer;
+		importer.TexConvert(argv[2], argv[3]);
+	}
 	else if (argc > 1)
 	{
 		Utility::Print("CMDLine Usage:\nextractpak \"ExtractedIsoDir\" \"OutputDir\"");
 	}
+	
 }

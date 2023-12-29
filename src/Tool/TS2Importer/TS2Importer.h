@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <unordered_map>
+#include <array>
 
 #include "memoryreader.h"
 class TS2Importer
@@ -60,6 +61,7 @@ class TS2Importer
 
 public:
 	bool PAKExtract(const std::string& pathToExtractedISO, const std::string& outputDirectory);
+	bool TexConvert(const std::string& pathToExtractedISO, const std::string& outputDirectory);
 
 private:
 	std::vector<PakFile> pakFiles;
