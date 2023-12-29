@@ -16,6 +16,7 @@ namespace Utility
 	std::string GetFileName(std::string_view path);
 	std::string ReplaceExtensionWith(std::string str, const std::string& extension);
 	std::string RemoveFileFromPathName(std::string str);
-	std::vector<std::string> GetFilesInDirectory(std::string dir);
+	std::vector<std::string> GetFilesInDirectoryRecursive(const std::string& dir);
+	std::vector<std::string> GetFilesInDirectory(const std::string& dir);
 	bool FileExists(const std::string& filePath);
 }

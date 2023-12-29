@@ -1,4 +1,5 @@
 #include "fileutils.h"
+#include "stringutils.h"
 #include "print.h"
 #include "break.h"
 
@@ -32,7 +33,51 @@ namespace Utility
 		return s.substr(lastPeriod, s.size() - lastPeriod);
 	}
 
-	std::vector<std::string> GetFilesInDirectory(std::string dir)
+	std::vector<std::string> GetFilesInDirectoryRecursive(const std::string& dir)
+	{
+		std::string pathAdjusted = Utility::ReplaceChar(dir, '/', '\\');;
+		if (!pathAdjusted.ends_with('\\'))
+			pathAdjusted.append("\\");
+
+		pathAdjusted.append("*");
+
+		WIN32_FIND_DATAA findFileData;
+		std::vector<std::string> files;
+		std::vector<std::string> dirs;
+
+		const auto GetDirectoryData = [&](const std::string& path)
+		{
+			std::string dirWithoutAsterisk = path;
+			dirWithoutAsterisk.erase(dirWithoutAsterisk.begin() + dirWithoutAsterisk.size() - 1);
+			HANDLE hFind = FindFirstFileA(path.c_str(), &findFileData);
+			while (hFind != INVALID_HANDLE_VALUE)
+			{
+				if (findFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+				{
+					dirs.push_back(dirWithoutAsterisk + findFileData.cFileName + "\\*");
+				}
+				else
+				{
+					files.push_back(dirWithoutAsterisk + findFileData.cFileName);
+				}
+				if (!FindNextFileA(hFind, &findFileData))
+					break;
+			}
+			if(hFind != INVALID_HANDLE_VALUE)
+				FindClose(hFind);
+
+			std::erase_if(dirs, [](const std::string& x) { return x.ends_with(".\\*"); });
+		};
+
+		GetDirectoryData(pathAdjusted);
+		for (size_t i = 0; i < dirs.size(); i++)
+		{
+			GetDirectoryData(dirs[i]);
+		}
+
+		return files;
+	}
+	std::vector<std::string> GetFilesInDirectory(const std::string& dir)
 	{
 		std::vector<std::string> files;
 
