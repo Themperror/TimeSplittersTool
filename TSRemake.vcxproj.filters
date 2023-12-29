@@ -25,6 +25,9 @@
     <Filter Include="Source Files\External">
       <UniqueIdentifier>{51dd8ee2-784a-455e-bd68-820c23d15957}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\External\tinygltf">
+      <UniqueIdentifier>{4aff260d-82ee-43dd-bf64-48d2c07eaa1d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -65,6 +68,9 @@
     </ClCompile>
     <ClCompile Include="external\lodepng.cpp">
       <Filter>Source Files\External</Filter>
+    </ClCompile>
+    <ClCompile Include="external\tinygltf\tiny_gltf.cc">
+      <Filter>Source Files\External\tinygltf</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -112,6 +118,18 @@
     </ClInclude>
     <ClInclude Include="external\lodepng.h">
       <Filter>Source Files\External</Filter>
+    </ClInclude>
+    <ClInclude Include="external\tinygltf\stb_image_write.h">
+      <Filter>Source Files\External\tinygltf</Filter>
+    </ClInclude>
+    <ClInclude Include="external\tinygltf\tiny_gltf.h">
+      <Filter>Source Files\External\tinygltf</Filter>
+    </ClInclude>
+    <ClInclude Include="external\tinygltf\json.hpp">
+      <Filter>Source Files\External\tinygltf</Filter>
+    </ClInclude>
+    <ClInclude Include="external\tinygltf\stb_image.h">
+      <Filter>Source Files\External\tinygltf</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

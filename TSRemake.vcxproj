@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="external\lodepng.cpp" />
+    <ClCompile Include="external\tinygltf\tiny_gltf.cc" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Tool\TS2Importer\TS2Importer.cpp" />
     <ClCompile Include="src\Tool\TS2Importer\TS2Level.cpp" />
@@ -35,6 +36,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="external\lodepng.h" />
+    <ClInclude Include="external\tinygltf\json.hpp" />
+    <ClInclude Include="external\tinygltf\stb_image.h" />
+    <ClInclude Include="external\tinygltf\stb_image_write.h" />
+    <ClInclude Include="external\tinygltf\tiny_gltf.h" />
     <ClInclude Include="src\common.h" />
     <ClInclude Include="src\Tool\TS2Importer\TS2Importer.h" />
     <ClInclude Include="src\Tool\TS2Importer\TS2Level.h" />
