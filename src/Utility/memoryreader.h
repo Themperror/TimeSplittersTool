@@ -36,7 +36,7 @@ namespace Utility
 				Utility::Break();
 			}
 			memcpy(ptr, data + offset, dataSize*numElements);
-			offset += dataSize;
+			offset += dataSize * numElements;
 		}
 
 		//array types (e.g: char[4])
