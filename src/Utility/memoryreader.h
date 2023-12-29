@@ -73,7 +73,7 @@ namespace Utility
 		{
 			offset += bytes;
 		}
-		void Seek(size_t offset, SeekMode mode)
+		void Seek(size_t offset, SeekMode mode = SeekMode::BEGIN)
 		{
 			switch (mode)
 			{
@@ -98,7 +98,7 @@ namespace Utility
 			}
 		}
 
-
+	private:
 		char* data;
 		size_t size;
 		size_t offset;
