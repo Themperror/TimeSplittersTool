@@ -59,10 +59,8 @@ class TS2Importer
 	};
 
 public:
-	bool Import(const std::string& path);
-	void Export(const std::string& inputDirectory, const std::string& output);
+	bool PAKExtract(const std::string& pathToExtractedISO, const std::string& outputDirectory);
 
 private:
-	void ExportPAK(const PakFile& pak, const std::string& inputDirectory, const std::string& output);
 	std::vector<PakFile> pakFiles;
 };

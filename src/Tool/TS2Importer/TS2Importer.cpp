@@ -6,9 +6,9 @@
 
 #include <algorithm>
 #include <filesystem>
-bool TS2Importer::Import(const std::string& path)
+bool TS2Importer::PAKExtract(const std::string& pathToExtractedISO, const std::string& outputDirectory)
 {
-	std::string pakPath = Utility::ReplaceChar(path, '/', '\\');;
+	std::string pakPath = Utility::ReplaceChar(pathToExtractedISO, '/', '\\');;
 	if (!pakPath.ends_with('\\'))
 		pakPath.append("\\");
 
@@ -62,6 +62,7 @@ bool TS2Importer::Import(const std::string& path)
 		Utility::MemoryReader reader((char*)fileData.data(),fileData.size());
 		PakFile pak;
 		pak.pakHeader = reader.Read<PakFile::PakHeader>();
+
 		switch (pak.GetPakVersion())
 		{
 			case PakFile::PakVersion::P4CK:
@@ -86,27 +87,14 @@ bool TS2Importer::Import(const std::string& path)
 		#endif
 		pak.filename = files[i];
 		pakFiles.push_back(pak);
+
+		for (const auto& file : pak.fileEntries)
+		{
+			std::filesystem::create_directories(outputDirectory + "\\" + Utility::GetPathName(file.first));
+			Utility::WriteFile(fileData.data() + file.second.offset, file.second.size, outputDirectory + "\\" + file.first);
+		}
 	}
 	return true;
-}
-
-void TS2Importer::Export(const std::string& inputDirectory, const std::string& output)
-{
-	for (const auto& pak : pakFiles)
-	{
-		ExportPAK(pak, inputDirectory, output);
-	}
-}
-
-
-void TS2Importer::ExportPAK(const PakFile& pak,const std::string& inputDirectory,  const std::string& output)
-{
-	const auto& fileData = Utility::ReadFileToVector(pak.filename);
-	for (const auto& file : pak.fileEntries)
-	{
-		std::filesystem::create_directories(output + "\\" + Utility::GetPathName(file.first));
-		Utility::WriteFile(fileData.data() + file.second.offset, file.second.size, output + "\\" + file.first);
-	}
 }
 
 
