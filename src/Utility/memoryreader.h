@@ -101,6 +101,10 @@ namespace Utility
 		{
 			return offset;
 		}
+		size_t Size()
+		{
+			return size;
+		}
 
 	private:
 		char* data;
