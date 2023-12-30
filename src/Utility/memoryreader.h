@@ -97,6 +97,10 @@ namespace Utility
 				}
 			}
 		}
+		size_t Tell()
+		{
+			return offset;
+		}
 
 	private:
 		char* data;
