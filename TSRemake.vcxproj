@@ -22,6 +22,7 @@
     <ClCompile Include="external\lodepng.cpp" />
     <ClCompile Include="external\tinygltf\tiny_gltf.cc" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\Tool\TS2Importer\TS2Animation.cpp" />
     <ClCompile Include="src\Tool\TS2Importer\TS2Importer.cpp" />
     <ClCompile Include="src\Tool\TS2Importer\TS2Level.cpp" />
     <ClCompile Include="src\Tool\TS2Importer\TS2Material.cpp" />
@@ -43,6 +44,7 @@
     <ClInclude Include="external\tinygltf\stb_image_write.h" />
     <ClInclude Include="external\tinygltf\tiny_gltf.h" />
     <ClInclude Include="src\common.h" />
+    <ClInclude Include="src\Tool\TS2Importer\TS2Animation.h" />
     <ClInclude Include="src\Tool\TS2Importer\TS2Importer.h" />
     <ClInclude Include="src\Tool\TS2Importer\TS2Level.h" />
     <ClInclude Include="src\Tool\TS2Importer\TS2Material.h" />
@@ -54,6 +56,7 @@
     <ClInclude Include="src\Utility\break.h" />
     <ClInclude Include="src\Utility\fileutils.h" />
     <ClInclude Include="src\Utility\memoryreader.h" />
+    <ClInclude Include="src\Utility\memorywriter.h" />
     <ClInclude Include="src\Utility\print.h" />
     <ClInclude Include="src\Utility\stringutils.h" />
     <ClInclude Include="src\Utility\svars.h" />

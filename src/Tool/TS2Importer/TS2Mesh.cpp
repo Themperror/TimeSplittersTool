@@ -13,7 +13,7 @@ std::optional<TSMesh> TSMesh::Load(Utility::MemoryReader& reader, const MeshInfo
 		if (matListSize > 0)
 		{
 			reader.Seek(info.Offset);
-			uint32_t numMats = matListSize / sizeof(MatInfo); // MatInfo.SIZE;
+			uint32_t numMats = matListSize / sizeof(TSMaterial);
 			mesh.mapMatInfo.resize(numMats);
 			reader.Read(mesh.mapMatInfo.data(), numMats);
 		}

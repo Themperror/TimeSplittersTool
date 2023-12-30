@@ -92,7 +92,7 @@ bool TS2Importer::TexConvert(const std::string& pathToExtractedData, const std::
 	{
 		const auto& fileData = Utility::ReadFileToVector(files[i]);
 		Utility::MemoryReader reader((char*)fileData.data(), fileData.size());
-		TS2Texture tex{};
+		TSTexture tex{};
 		tex.LoadTexture(reader);
 		std::string outPath = outputDirectory;
 		if (!outPath.ends_with('\\'))

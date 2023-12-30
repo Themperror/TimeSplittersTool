@@ -3,6 +3,18 @@
 class TSMaterial
 {
 public:
+	enum class WrapMode : uint32_t
+	{
+		Repeat,
+		NoRepeat
+	};
+	enum Flag : uint32_t
+	{
+		None,
+		TexturesIncInModel = 268435456
+	};
 	uint32_t ID;
-	uint32_t unknown[3];
+	WrapMode wrapX;
+	WrapMode wrapY;
+	Flag flag;
 };

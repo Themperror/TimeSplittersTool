@@ -2,6 +2,7 @@
 #include <vector>
 #include <optional>
 #include "memoryreader.h"
+#include "TS2Material.h"
 class TSMesh
 {
 public:
@@ -59,30 +60,13 @@ public:
 		float W;
 	};
 
-	struct MatInfo
-	{
-		enum class WrapMode : uint32_t
-		{
-			Repeat,
-			NoRepeat
-		};
-		enum class Flag : uint32_t
-		{
-			None,
-			TexturesIncInModel = 268435456
-		};
-		uint32_t ID;
-		WrapMode wrapX;
-		WrapMode wrapY;
-		Flag flag;
-	};
 
 	std::vector<TSVertex> vertices;
 	std::vector<TSUV> uvs;
 	std::vector<TSVertex> normals;
 	std::vector<uint32_t> vertexColors;
 	std::vector<SubMeshData> submeshData;
-	std::vector<MatInfo> mapMatInfo;
+	std::vector<TSMaterial> mapMatInfo;
 
 
 	static std::optional<TSMesh> Load(Utility::MemoryReader& reader, const MeshInfo::MeshOffset& info, uint32_t matRange, bool isMapMesh = false);

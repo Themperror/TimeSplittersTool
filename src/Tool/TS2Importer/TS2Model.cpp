@@ -51,6 +51,21 @@ void TSModel::Load(Utility::MemoryReader& reader)
 		LoadSubMesh(meshInfos[i].MeshOffset2, meshInfos[i].MatIDOffset2);
 		LoadSubMesh(meshInfos[i].MeshOffsetTransparent, meshInfos[i].MatIDOffset3);
 	}
+
+	textures.resize(materials.size());
+	for (size_t i = 0; i < materials.size(); i++)
+	{
+		if (materials[i].flag & TSMaterial::Flag::TexturesIncInModel)
+		{
+			reader.Seek(materials[i].ID);
+			textures[i].emplace().LoadTexture(reader);
+		}
+		else
+		{
+			textures[i].reset();
+		}
+
+	}
 }
 
 struct CombinedMesh
@@ -150,7 +165,7 @@ bool TSModel::ExportToGLTF(const std::string& outputPath)
 	std::vector<float> normals;
 	std::vector<uint32_t> colors;
 
-	std::unordered_map<uint32_t, std::vector<uint32_t>> submeshIndicesMap;
+	std::map<uint32_t, std::vector<uint32_t>> submeshIndicesMap;
 
 	for (auto& tsmesh : meshes)
 	{
@@ -303,11 +318,69 @@ bool TSModel::ExportToGLTF(const std::string& outputPath)
 		memcpy(buffer.data.data(), colors.data(), sizeof(uint32_t) * colors.size());
 	}
 
+	size_t initialBufferCount = model.buffers.size();
+
+	for (size_t i = 0; i < textures.size(); i++)
+	{
+		if (textures[i].has_value())
+		{
+			const char* pngData;
+			size_t pngSize;
+			textures[i]->ExportToPNGInMemory(pngData,pngSize);
+			auto& texture = model.textures.emplace_back();
+			texture.source = (int)model.images.size();
+			texture.sampler = (int)model.samplers.size();
+			texture.name = "DIFFUSE";
+
+			auto& image = model.images.emplace_back();
+			image.height = textures[i]->GetHeight();
+			image.width = textures[i]->GetWidth();
+			image.bits = 8;
+			image.mimeType = "image/png";
+			image.component = 4;
+			image.pixel_type = TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE;
+			image.name = "DIFFUSE";
+			image.bufferView = model.bufferViews.size();
+
+			//what the fuck should this do
+			//image.as_is = false;
+			//image.image.resize(pngSize);
+			//memcpy(image.image.data(), pngData, pngSize);
+
+			auto& accessor = model.accessors.emplace_back();
+			accessor.bufferView = image.bufferView;
+			accessor.componentType = TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE;
+			accessor.name = "DIFFUSE";
+			accessor.type = TINYGLTF_TYPE_VEC4;
+			accessor.count = image.width * image.height;
+
+			auto& view = model.bufferViews.emplace_back();
+			view.buffer = model.buffers.size();
+			view.byteLength = pngSize;
+			//view.target = TINYGLTF_TARGET_ELEMENT_ARRAY_BUFFER;
+			view.name = "DIFFUSE";
+			
+			auto& buffer = model.buffers.emplace_back();
+			buffer.name = "DIFFUSE";
+			buffer.data.resize(pngSize);
+			memcpy(buffer.data.data(), pngData, pngSize);
+
+			auto& sampler = model.samplers.emplace_back();
+			sampler.wrapS = materials[i].wrapX == TSMaterial::WrapMode::Repeat ? TINYGLTF_TEXTURE_WRAP_REPEAT : TINYGLTF_TEXTURE_WRAP_CLAMP_TO_EDGE;
+			sampler.wrapT = materials[i].wrapY == TSMaterial::WrapMode::Repeat ? TINYGLTF_TEXTURE_WRAP_REPEAT : TINYGLTF_TEXTURE_WRAP_CLAMP_TO_EDGE;
+			sampler.magFilter = TINYGLTF_TEXTURE_FILTER_LINEAR;
+			sampler.minFilter = TINYGLTF_TEXTURE_FILTER_LINEAR;
+		}
+	}
+
+
 	struct IndexMatPair
 	{
 		int gltfIndexBuffer;
 		int gltfMaterial;
 	};
+
+
 	std::unordered_map<uint32_t, IndexMatPair> materialIDtoBufferMap;
 	for (const auto& indices : submeshIndicesMap)
 	{
@@ -317,7 +390,11 @@ bool TSModel::ExportToGLTF(const std::string& outputPath)
 			it = materialIDtoBufferMap.try_emplace(it, indices.first, IndexMatPair{ (int)model.buffers.size(), (int)model.materials.size() });
 			auto& material = model.materials.emplace_back();
 			material.name = std::to_string(indices.first);
-
+			if (indices.first != 0xFFFF && textures[indices.first].has_value())
+			{
+				material.pbrMetallicRoughness.baseColorTexture.index = indices.first;
+				material.pbrMetallicRoughness.baseColorTexture.texCoord = 0;
+			}
 			//create indices buffer
 			{
 				auto& accessor = model.accessors.emplace_back();
@@ -356,5 +433,6 @@ bool TSModel::ExportToGLTF(const std::string& outputPath)
 		}
 	}
 
-	return gltf.WriteGltfSceneToFile(&model, outputPath, false, true,true,false);
+	bool success = gltf.WriteGltfSceneToFile(&model, outputPath, true, true, true, false);
+	return success;
 }

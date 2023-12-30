@@ -78,6 +78,9 @@
     <ClCompile Include="external\tinygltf\tiny_gltf.cc">
       <Filter>Source Files\External\tinygltf</Filter>
     </ClCompile>
+    <ClCompile Include="src\Tool\TS2Importer\TS2Animation.cpp">
+      <Filter>Source Files\Tool\TS2Importer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Tool\TS2Importer\TS2Mesh.h">
@@ -142,6 +145,12 @@
     </ClInclude>
     <ClInclude Include="external\tinygltf\stb_image.h">
       <Filter>Source Files\External\tinygltf</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Tool\TS2Importer\TS2Animation.h">
+      <Filter>Source Files\Tool\TS2Importer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Utility\memorywriter.h">
+      <Filter>Source Files\Utility</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
