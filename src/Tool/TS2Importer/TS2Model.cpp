@@ -234,6 +234,28 @@ bool TSModel::ExportToGLTF(const std::string& outputPath)
 		buffer.data.resize(uvs.size() * sizeof(float));
 		memcpy(buffer.data.data(), uvs.data(), sizeof(float) * uvs.size());
 	}
+	{
+		usedAttributes.try_emplace("WEIGHTS_0", (int)model.buffers.size());
+
+		auto& accessor = model.accessors.emplace_back();
+		accessor.componentType = TINYGLTF_COMPONENT_TYPE_FLOAT;
+		accessor.type = TINYGLTF_TYPE_SCALAR;
+		accessor.bufferView = (int)model.buffers.size();
+		accessor.count = weights.size();
+		accessor.name = "WEIGHTS_0";
+
+		auto& view = model.bufferViews.emplace_back();
+		view.buffer = (int)model.buffers.size();
+		view.byteStride = sizeof(float) ;
+		view.byteLength = weights.size() * sizeof(float);
+		view.name = "WEIGHTS_0";
+		view.target = TINYGLTF_TARGET_ARRAY_BUFFER;
+
+		auto& buffer = model.buffers.emplace_back();
+		buffer.name = "WEIGHTS_0";
+		buffer.data.resize(weights.size() * sizeof(float));
+		memcpy(buffer.data.data(), weights.data(), sizeof(float) * weights.size());
+	}
 	if (normals.size())
 	{
 		usedAttributes.try_emplace("NORMAL", (int)model.buffers.size());
