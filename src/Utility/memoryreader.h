@@ -68,7 +68,7 @@ namespace Utility
 		}
 
 
-		bool IsEOF() { return offset == size; }
+		bool IsEOF() const { return offset == size; }
 		void Skip(size_t bytes)
 		{
 			offset += bytes;
@@ -97,11 +97,11 @@ namespace Utility
 				}
 			}
 		}
-		size_t Tell()
+		size_t Tell() const
 		{
 			return offset;
 		}
-		size_t Size()
+		size_t Size() const
 		{
 			return size;
 		}

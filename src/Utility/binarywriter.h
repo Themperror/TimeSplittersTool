@@ -22,7 +22,7 @@ namespace Utility
 				fclose(file);
 		}
 		BinaryWriter(const BinaryWriter&) = delete;
-		BinaryWriter(BinaryWriter&& rhs)
+		BinaryWriter(BinaryWriter&& rhs) noexcept
 		{
 			file = rhs.file;
 			path = rhs.path;
@@ -61,7 +61,7 @@ namespace Utility
 			fwrite(source, dataSize, numElements, file);
 		}
 
-		bool IsGood() { return file != nullptr; }
+		bool IsGood() const { return file != nullptr; }
 		void Close() { if (IsGood()) fclose(file), file = nullptr; }
 		std::string path;
 		FILE* file;

@@ -65,6 +65,9 @@ namespace Utility
 			buffer.reserve(size);
 		}
 
+		const char* GetData() const { return buffer.data(); }
+		size_t GetSize() const { return buffer.size(); }
+
 		std::vector<char> buffer;
 	};
 
