@@ -21,23 +21,35 @@ void TSModel::Load(Utility::MemoryReader& reader)
 	reader.Seek(meshOffset);
 
 	uint32_t meshCount = reader.Read<uint32_t>();
-	uint32_t meshInfoChunkSize = meshCount * sizeof(TSMesh);
+	uint32_t meshInfoChunkSize = meshCount * sizeof(TSMesh::MeshInfo);
 	uint32_t meshInfoOffset = meshOffset - meshInfoChunkSize;
+	
+	reader.Skip(36);
+	float scale = reader.Read<float>();
 
 	reader.Seek(meshInfoOffset);
 
 	std::vector<TSMesh::MeshInfo> meshInfos;
-
+	meshInfos.reserve(meshCount);
 	for (size_t i = 0; i < meshCount; i++)
 	{
-		meshInfos.emplace_back(reader.Read<TSMesh::MeshInfo>());
+		TSMesh::MeshInfo& info = meshInfos.emplace_back(reader.Read<TSMesh::MeshInfo>());
 	}
-	std::vector<TSMesh> meshes;
+
+	auto LoadSubMesh = [&](const TSMesh::MeshInfo::MeshOffset&  meshOffset, uint32_t matOffset)
+	{
+		auto loadedMesh = TSMesh::Load(reader, meshOffset, matOffset);
+		if (loadedMesh.has_value())
+		{
+			meshes.push_back(loadedMesh.value());
+		}
+	};
 
 	for (size_t i = 0; i < meshInfos.size(); i++)
 	{
-		TSMesh& mesh = meshes.emplace_back();
-		mesh.Load(reader, meshInfos[i]);
+		LoadSubMesh(meshInfos[i].MeshOffset1, meshInfos[i].MatIDOffset);
+		LoadSubMesh(meshInfos[i].MeshOffset2, meshInfos[i].MatIDOffset2);
+		LoadSubMesh(meshInfos[i].MeshOffsetTransparent, meshInfos[i].MatIDOffset3);
 	}
 }
 
@@ -52,6 +64,7 @@ struct CombinedMesh
 
 	std::vector<float> vertices_f3;
 	std::vector<float> uvs_f2;
+	std::vector<float> weights_f1;
 	std::vector<float> normals_f3;
 	std::vector<uint32_t> color_u1;
 	std::vector<SubMeshData> submeshes;
@@ -81,6 +94,7 @@ CombinedMesh CombineSubmeshes(const TSMesh& tsmesh, size_t vertexOffset)
 
 				combinedMesh.uvs_f2.push_back(uv.U);
 				combinedMesh.uvs_f2.push_back(uv.V);
+				combinedMesh.weights_f1.push_back(uv.W);
 
 				if (tsmesh.normals.size())
 				{
@@ -132,6 +146,7 @@ bool TSModel::ExportToGLTF(const std::string& outputPath)
 	
 	std::vector<float> vertices;
 	std::vector<float> uvs;
+	std::vector<float> weights;
 	std::vector<float> normals;
 	std::vector<uint32_t> colors;
 
@@ -139,24 +154,16 @@ bool TSModel::ExportToGLTF(const std::string& outputPath)
 
 	for (auto& tsmesh : meshes)
 	{
-		auto& mesh = model.meshes.emplace_back();
 		const CombinedMesh& combined = CombineSubmeshes(tsmesh, vertices.size() / 3);
 
 		for (size_t j = 0; j < combined.submeshes.size(); j++)
 		{
 			const auto& data = combined.submeshes[j];
 
-			auto it = submeshIndicesMap.find(data.MatID);
-			if (it != submeshIndicesMap.end())
-			{
-				size_t originalSize = it->second.size();
-				it->second.resize(originalSize + data.indices.size());
-				memcpy(it->second.data() + originalSize, data.indices.data(), sizeof(uint32_t) * data.indices.size());
-			}
-			else
-			{
-				submeshIndicesMap.try_emplace(data.MatID, data.indices);
-			}
+			auto& submeshIndices = submeshIndicesMap[data.MatID];
+			size_t originalSize = submeshIndices.size();
+			submeshIndices.resize(originalSize + data.indices.size());
+			memcpy(submeshIndices.data() + originalSize, data.indices.data(), sizeof(uint32_t) * data.indices.size());
 		}
 
 
@@ -169,6 +176,10 @@ bool TSModel::ExportToGLTF(const std::string& outputPath)
 		uvs.resize(originalSizeUvs + combined.uvs_f2.size());
 		memcpy(uvs.data() + originalSizeUvs, combined.uvs_f2.data(), sizeof(float) * combined.uvs_f2.size());
 
+		size_t originalSizeWeights = weights.size();
+		weights.resize(originalSizeWeights + combined.weights_f1.size());
+		memcpy(weights.data() + originalSizeWeights, combined.weights_f1.data(), sizeof(float) * combined.weights_f1.size());
+		
 		size_t originalSizeNormals = normals.size();
 		normals.resize(originalSizeNormals + combined.normals_f3.size());
 		memcpy(normals.data() + originalSizeNormals, combined.normals_f3.data(), sizeof(float) * combined.normals_f3.size());
@@ -176,109 +187,115 @@ bool TSModel::ExportToGLTF(const std::string& outputPath)
 		size_t originalSizeColors = colors.size();
 		colors.resize(originalSizeColors + combined.color_u1.size());
 		memcpy(colors.data() + originalSizeColors, combined.color_u1.data(), sizeof(float) * combined.color_u1.size());
+	}
 
 
-		std::map<std::string, int> usedAttributes;
+	std::map<std::string, int> usedAttributes;
+	{
+		usedAttributes.try_emplace("POSITION", (int)model.buffers.size());
+		auto& accessor = model.accessors.emplace_back();
+		accessor.componentType = TINYGLTF_COMPONENT_TYPE_FLOAT;
+		accessor.type = TINYGLTF_TYPE_VEC3;
+		accessor.bufferView = (int)model.buffers.size();
+		accessor.count = vertices.size() / 3;
+		accessor.name = "POSITION";
+
+		auto& view = model.bufferViews.emplace_back();
+		view.buffer = (int)model.buffers.size();
+		view.byteStride = sizeof(float) * 3;
+		view.byteLength = vertices.size() * sizeof(float);
+		view.name = "POSITION";
+		view.target = TINYGLTF_TARGET_ARRAY_BUFFER;
+
+		auto& buffer = model.buffers.emplace_back();
+		buffer.name = "POSITION";
+		buffer.data.resize(vertices.size() * sizeof(float));
+		memcpy(buffer.data.data(), vertices.data(), sizeof(float) * vertices.size());
+	}
+	{
+		usedAttributes.try_emplace("TEXCOORD_0", (int)model.buffers.size());
+
+		auto& accessor = model.accessors.emplace_back();
+		accessor.componentType = TINYGLTF_COMPONENT_TYPE_FLOAT;
+		accessor.type = TINYGLTF_TYPE_VEC2;
+		accessor.bufferView = (int)model.buffers.size();
+		accessor.count = uvs.size() / 2;
+		accessor.name = "TEXCOORD_0";
+
+		auto& view = model.bufferViews.emplace_back();
+		view.buffer = (int)model.buffers.size();
+		view.byteStride = sizeof(float) * 2;
+		view.byteLength = uvs.size() * sizeof(float);
+		view.name = "TEXCOORD_0";
+		view.target = TINYGLTF_TARGET_ARRAY_BUFFER;
+
+		auto& buffer = model.buffers.emplace_back();
+		buffer.name = "TEXCOORD_0";
+		buffer.data.resize(uvs.size() * sizeof(float));
+		memcpy(buffer.data.data(), uvs.data(), sizeof(float) * uvs.size());
+	}
+	if (normals.size())
+	{
+		usedAttributes.try_emplace("NORMAL", (int)model.buffers.size());
+
+		auto& accessor = model.accessors.emplace_back();
+		accessor.componentType = TINYGLTF_COMPONENT_TYPE_FLOAT;
+		accessor.type = TINYGLTF_TYPE_VEC3;
+		accessor.bufferView = (int)model.buffers.size();
+		accessor.count = normals.size() / 3;
+		accessor.name = "NORMAL";
+
+		auto& view = model.bufferViews.emplace_back();
+		view.buffer = (int)model.buffers.size();
+		view.byteStride = sizeof(float) * 3;
+		view.byteLength = normals.size() * sizeof(float);
+		view.name = "NORMAL";
+		view.target = TINYGLTF_TARGET_ARRAY_BUFFER;
+
+		auto& buffer = model.buffers.emplace_back();
+		buffer.name = "NORMAL";
+		buffer.data.resize(normals.size() * sizeof(float));
+		memcpy(buffer.data.data(), normals.data(), sizeof(float) * normals.size());
+	}
+	if (colors.size())
+	{
+		usedAttributes.try_emplace("COLOR_0", (int)model.buffers.size());
+
+		auto& accessor = model.accessors.emplace_back();
+		accessor.componentType = TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE;
+		accessor.type = TINYGLTF_TYPE_VEC4;
+		accessor.bufferView = (int)model.buffers.size();
+		accessor.count = colors.size();
+		accessor.name = "COLOR_0";
+
+		auto& view = model.bufferViews.emplace_back();
+		view.buffer = (int)model.buffers.size();
+		view.byteStride = sizeof(uint32_t);
+		view.byteLength = colors.size() * sizeof(uint32_t);
+		view.name = "COLOR_0";
+		view.target = TINYGLTF_TARGET_ARRAY_BUFFER;
+
+		auto& buffer = model.buffers.emplace_back();
+		buffer.name = "COLOR_0";
+		buffer.data.resize(colors.size() * sizeof(uint32_t));
+		memcpy(buffer.data.data(), colors.data(), sizeof(uint32_t) * colors.size());
+	}
+
+	struct IndexMatPair
+	{
+		int gltfIndexBuffer;
+		int gltfMaterial;
+	};
+	std::unordered_map<uint32_t, IndexMatPair> materialIDtoBufferMap;
+	for (const auto& indices : submeshIndicesMap)
+	{
+		auto it = materialIDtoBufferMap.find(indices.first);
+		if (it == materialIDtoBufferMap.end())
 		{
-			usedAttributes.try_emplace("POSITION", (int)model.buffers.size());
-			auto& accessor = model.accessors.emplace_back();
-			accessor.componentType = TINYGLTF_COMPONENT_TYPE_FLOAT;
-			accessor.type = TINYGLTF_TYPE_VEC3;
-			accessor.bufferView = (int)model.buffers.size();
-			accessor.count = vertices.size() / 3;
-			accessor.name = "POSITION";
+			it = materialIDtoBufferMap.try_emplace(it, indices.first, IndexMatPair{ (int)model.buffers.size(), (int)model.materials.size() });
+			auto& material = model.materials.emplace_back();
+			material.name = std::to_string(indices.first);
 
-			auto& view = model.bufferViews.emplace_back();
-			view.buffer = (int)model.buffers.size();
-			view.byteStride = sizeof(float) * 3;
-			view.byteLength = vertices.size() * sizeof(float);
-			view.name = "POSITION";
-			view.target = TINYGLTF_TARGET_ARRAY_BUFFER;
-
-			auto& buffer = model.buffers.emplace_back();
-			buffer.name = "POSITION";
-			buffer.data.resize(vertices.size() * sizeof(float));
-			memcpy(buffer.data.data(), vertices.data(), sizeof(float) * vertices.size());
-		}
-		{
-			usedAttributes.try_emplace("TEXCOORD_0", (int)model.buffers.size());
-
-			auto& accessor = model.accessors.emplace_back();
-			accessor.componentType = TINYGLTF_COMPONENT_TYPE_FLOAT;
-			accessor.type = TINYGLTF_TYPE_VEC2;
-			accessor.bufferView = (int)model.buffers.size();
-			accessor.count = uvs.size() / 2;
-			accessor.name = "TEXCOORD_0";
-
-			auto& view = model.bufferViews.emplace_back();
-			view.buffer = (int)model.buffers.size();
-			view.byteStride = sizeof(float) * 2;
-			view.byteLength = uvs.size() * sizeof(float);
-			view.name = "TEXCOORD_0";
-			view.target = TINYGLTF_TARGET_ARRAY_BUFFER;
-
-			auto& buffer = model.buffers.emplace_back();
-			buffer.name = "TEXCOORD_0";
-			buffer.data.resize(uvs.size() * sizeof(float));
-			memcpy(buffer.data.data(), uvs.data(), sizeof(float) * uvs.size());
-		}
-		if(normals.size())
-		{
-			usedAttributes.try_emplace("NORMAL", (int)model.buffers.size());
-
-			auto& accessor = model.accessors.emplace_back();
-			accessor.componentType = TINYGLTF_COMPONENT_TYPE_FLOAT;
-			accessor.type = TINYGLTF_TYPE_VEC3;
-			accessor.bufferView = (int)model.buffers.size();
-			accessor.count = normals.size() / 3;
-			accessor.name = "NORMAL";
-
-			auto& view = model.bufferViews.emplace_back();
-			view.buffer = (int)model.buffers.size();
-			view.byteStride = sizeof(float) * 3;
-			view.byteLength = normals.size() * sizeof(float);
-			view.name = "NORMAL";
-			view.target = TINYGLTF_TARGET_ARRAY_BUFFER;
-
-			auto& buffer = model.buffers.emplace_back();
-			buffer.name = "NORMAL";
-			buffer.data.resize(normals.size() * sizeof(float));
-			memcpy(buffer.data.data(), normals.data(), sizeof(float) * normals.size());
-		}
-		{
-			usedAttributes.try_emplace("COLOR_0", (int)model.buffers.size());
-
-			auto& accessor = model.accessors.emplace_back();
-			accessor.componentType = TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE;
-			accessor.type = TINYGLTF_TYPE_VEC4;
-			accessor.bufferView = (int)model.buffers.size();
-			accessor.count = colors.size();
-			accessor.name = "COLOR_0";
-
-			auto& view = model.bufferViews.emplace_back();
-			view.buffer = (int)model.buffers.size();
-			view.byteStride = sizeof(uint32_t);
-			view.byteLength = colors.size() * sizeof(uint32_t);
-			view.name = "COLOR_0";
-			view.target = TINYGLTF_TARGET_ARRAY_BUFFER;
-
-			auto& buffer = model.buffers.emplace_back();
-			buffer.name = "COLOR_0";
-			buffer.data.resize(colors.size() * sizeof(uint32_t));
-			memcpy(buffer.data.data(), colors.data(), sizeof(uint32_t) * colors.size());
-		}
-
-		std::unordered_map<uint32_t, int> materialIDtoBufferMap;
-		for (const auto& indices : submeshIndicesMap)
-		{
-			auto it = materialIDtoBufferMap.find(indices.first);
-			if (it == materialIDtoBufferMap.end())
-			{
-				it = materialIDtoBufferMap.try_emplace(it, indices.first, (int)model.materials.size());
-				auto& material = model.materials.emplace_back();
-				material.name = std::to_string(indices.first);
-			}
-			
 			//create indices buffer
 			{
 				auto& accessor = model.accessors.emplace_back();
@@ -305,11 +322,17 @@ bool TSModel::ExportToGLTF(const std::string& outputPath)
 			mesh.name = std::to_string(indices.first);
 
 			auto& primitive = mesh.primitives.emplace_back();
-			primitive.indices = (int)model.buffers.size();
+			primitive.indices = it->second.gltfIndexBuffer;
 			primitive.mode = TINYGLTF_MODE_TRIANGLES;
 			primitive.attributes = usedAttributes;
-			primitive.material = it->second;
+			primitive.material = it->second.gltfMaterial;
+
+
+			auto& node = model.nodes.emplace_back();
+			node.mesh = model.meshes.size() - 1;
+			node.name = model.meshes.back().name;
 		}
 	}
+
 	return gltf.WriteGltfSceneToFile(&model, outputPath, false, true,true,false);
 }

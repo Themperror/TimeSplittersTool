@@ -1,51 +1,71 @@
 #include "TS2Mesh.h"
 
-void TSMesh::Load(Utility::MemoryReader& reader, const MeshInfo& info)
+std::optional<TSMesh> TSMesh::Load(Utility::MemoryReader& reader, const MeshInfo::MeshOffset& info, uint32_t matRange, bool isMapMesh)
 {
+	if (matRange == 0) 
+		return std::nullopt;
+	TSMesh mesh;
+
+	 // Mat infos
+	if (isMapMesh)
+	{
+		uint32_t matListSize = info.VertexOffset - info.Offset;
+		if (matListSize > 0)
+		{
+			reader.Seek(info.Offset);
+			uint32_t numMats = matListSize / sizeof(MatInfo); // MatInfo.SIZE;
+			mesh.mapMatInfo.resize(numMats);
+			reader.Read(mesh.mapMatInfo.data(), numMats);
+		}
+	}
+
 	reader.Seek(info.VertexOffset);
 
-	constexpr size_t VERT_SIZE = sizeof(TSVertex);
 	size_t sizeInBytes = info.UVOffset - info.VertexOffset;
 	size_t numVerts = sizeInBytes / sizeof(TSVertex);
 
-	vertices.reserve(numVerts);
+	mesh.vertices.reserve(numVerts);
 	for (size_t i = 0; i < numVerts; i++)
 	{
-		vertices.push_back(reader.Read<TSVertex>());
+		mesh.vertices.push_back(reader.Read<TSVertex>());
 	}
 
 	reader.Seek(info.UVOffset);
-	uvs.reserve(numVerts);
+	mesh.uvs.reserve(numVerts);
 	for (size_t i = 0; i < numVerts; i++)
 	{
-		uvs.push_back(reader.Read<TSUV>());
+		mesh.uvs.push_back(reader.Read<TSUV>());
 	}
 
-	reader.Seek(info.VertexColorOffset);
-	vertexColors.reserve(numVerts);
-	for (size_t i = 0; i < numVerts; i++)
+	if (info.VertexColorOffset)
 	{
-		vertexColors.push_back(reader.Read<uint32_t>());
+		reader.Seek(info.VertexColorOffset);
+		mesh.vertexColors.reserve(numVerts);
+		for (size_t i = 0; i < numVerts; i++)
+		{
+			mesh.vertexColors.push_back(reader.Read<uint32_t>());
+		}
 	}
 
 	if (info.NormalOffset)
 	{
 		reader.Seek(info.NormalOffset);
+		mesh.normals.reserve(numVerts);
 		for (size_t i = 0; i < numVerts; i++)
 		{
-			normals.push_back(reader.Read<TSVertex>());
+			mesh.normals.push_back(reader.Read<TSVertex>());
 		}
 	}
 
-	reader.Seek(info.MatIDOffset);
+	reader.Seek(matRange);
 	SubMeshData submesh = reader.Read<SubMeshData>();
-	submeshData.push_back(submesh);
-	uint16_t endMarker = reader.Read<uint16_t>();
-	while (endMarker) //maybe not add the last submesh?
+	mesh.submeshData.push_back(submesh);
+	uint16_t endMarker = 0;
+	while ((endMarker = reader.Read<uint16_t>()) != 0xFFFF) //maybe not add the last submesh?
 	{
 		submesh = reader.Read<SubMeshData>();
-		endMarker = reader.Read<uint16_t>();
-		submeshData.push_back(submesh);
+		if(submesh.VertexCount != 0)
+			mesh.submeshData.push_back(submesh);
 	}
-
+	return mesh;
 }
