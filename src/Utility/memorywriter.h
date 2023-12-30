@@ -28,7 +28,7 @@ namespace Utility
 			constexpr size_t dataSize = sizeof(T);
 			size_t initialSize = buffer.size();
 			buffer.resize(buffer.size() + dataSize);
-			memcpy(buffer.data() + initialSize, &ptr, dataSize);
+			memcpy(buffer.data() + initialSize, &val, dataSize);
 		}
 
 		template<typename T, std::enable_if_t<std::is_pointer_v<T>, int> = 0 >
@@ -63,6 +63,16 @@ namespace Utility
 		void Reserve(size_t size)
 		{
 			buffer.reserve(size);
+		}
+
+		void Clear()
+		{
+			buffer.clear();
+		}
+
+		void ShrinkToFit()
+		{
+			buffer.shrink_to_fit();
 		}
 
 		const char* GetData() const { return buffer.data(); }
