@@ -32,7 +32,7 @@ namespace Utility
 
 		//value types (e.g: int)
 		template<typename T, std::enable_if_t<!std::is_void_v<T>, int> = 0 >
-		void Write(T val)
+		void Write(const T& val)
 		{
 			constexpr size_t dataSize = sizeof(T);
 			fwrite(&val, dataSize, 1, file);
