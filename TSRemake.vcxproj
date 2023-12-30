@@ -24,7 +24,9 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Tool\TS2Importer\TS2Importer.cpp" />
     <ClCompile Include="src\Tool\TS2Importer\TS2Level.cpp" />
+    <ClCompile Include="src\Tool\TS2Importer\TS2Material.cpp" />
     <ClCompile Include="src\Tool\TS2Importer\TS2Mesh.cpp" />
+    <ClCompile Include="src\Tool\TS2Importer\TS2Model.cpp" />
     <ClCompile Include="src\Tool\TS2Importer\TS2Skeleton.cpp" />
     <ClCompile Include="src\Tool\TS2Importer\TS2Texture.cpp" />
     <ClCompile Include="src\Utility\break.cpp" />
@@ -43,7 +45,9 @@
     <ClInclude Include="src\common.h" />
     <ClInclude Include="src\Tool\TS2Importer\TS2Importer.h" />
     <ClInclude Include="src\Tool\TS2Importer\TS2Level.h" />
+    <ClInclude Include="src\Tool\TS2Importer\TS2Material.h" />
     <ClInclude Include="src\Tool\TS2Importer\TS2Mesh.h" />
+    <ClInclude Include="src\Tool\TS2Importer\TS2Model.h" />
     <ClInclude Include="src\Tool\TS2Importer\TS2Skeleton.h" />
     <ClInclude Include="src\Tool\TS2Importer\TS2Texture.h" />
     <ClInclude Include="src\Utility\binarywriter.h" />

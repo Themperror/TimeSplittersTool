@@ -62,6 +62,7 @@ class TS2Importer
 public:
 	bool PAKExtract(const std::string& pathToExtractedISO, const std::string& outputDirectory);
 	bool TexConvert(const std::string& pathToExtractedISO, const std::string& outputDirectory);
+	bool ModelConvert(const std::string& pathToExtractedISO, const std::string& outputDirectory);
 
 private:
 	std::vector<PakFile> pakFiles;

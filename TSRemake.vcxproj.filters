@@ -69,6 +69,12 @@
     <ClCompile Include="external\lodepng.cpp">
       <Filter>Source Files\External</Filter>
     </ClCompile>
+    <ClCompile Include="src\Tool\TS2Importer\TS2Model.cpp">
+      <Filter>Source Files\Tool\TS2Importer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Tool\TS2Importer\TS2Material.cpp">
+      <Filter>Source Files\Tool\TS2Importer</Filter>
+    </ClCompile>
     <ClCompile Include="external\tinygltf\tiny_gltf.cc">
       <Filter>Source Files\External\tinygltf</Filter>
     </ClCompile>
@@ -118,6 +124,12 @@
     </ClInclude>
     <ClInclude Include="external\lodepng.h">
       <Filter>Source Files\External</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Tool\TS2Importer\TS2Model.h">
+      <Filter>Source Files\Tool\TS2Importer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Tool\TS2Importer\TS2Material.h">
+      <Filter>Source Files\Tool\TS2Importer</Filter>
     </ClInclude>
     <ClInclude Include="external\tinygltf\stb_image_write.h">
       <Filter>Source Files\External\tinygltf</Filter>
