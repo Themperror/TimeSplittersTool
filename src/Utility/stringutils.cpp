@@ -24,7 +24,7 @@ bool Utility::Contains(const std::string& sourceString, const std::string& searc
 	const std::string& source = caseSensitive ? sourceString : ToLowerCase(sourceString);
 	const std::string& search = caseSensitive ? searchString : ToLowerCase(searchString);
 	
-	size_t offset = source.find_first_of(search);
+	size_t offset = source.find(search);
 	return offset != std::string::npos;
 }
 bool Utility::Contains(const std::string_view& sourceString, const std::string_view& searchString, bool caseSensitive)
@@ -32,7 +32,7 @@ bool Utility::Contains(const std::string_view& sourceString, const std::string_v
 	const std::string_view& source = caseSensitive ? sourceString : ToLowerCase(std::string(sourceString.data(),sourceString.size()));
 	const std::string_view& search = caseSensitive ? searchString : ToLowerCase(std::string(searchString.data(),searchString.size()));
 	
-	size_t offset = source.find_first_of(search);
+	size_t offset = source.find(search);
 	return offset != std::string::npos;
 }
 
