@@ -447,7 +447,7 @@ bool TSModel::ExportToGLTF(const std::string& outputPath)
 
 	if (animations.size())
 	{
-		constexpr float FRAMERATE = 30.0f;
+		constexpr float FRAMERATE = 20.0f;
 		for (auto& tsAnim : animations)
 		{
 			if (tsAnim.tracks.size() == 0) continue;
