@@ -52,6 +52,7 @@
     <ClInclude Include="src\Tool\TS2Importer\TS2Model.h" />
     <ClInclude Include="src\Tool\TS2Importer\TS2Skeleton.h" />
     <ClInclude Include="src\Tool\TS2Importer\TS2Texture.h" />
+    <ClInclude Include="src\Tool\TS2Importer\TS2Types.h" />
     <ClInclude Include="src\Utility\binarywriter.h" />
     <ClInclude Include="src\Utility\break.h" />
     <ClInclude Include="src\Utility\fileutils.h" />

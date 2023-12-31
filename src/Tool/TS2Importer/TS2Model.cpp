@@ -154,6 +154,18 @@ CombinedMesh CombineSubmeshes(const TSMesh& tsmesh, size_t vertexOffset)
 	return combinedMesh;
 }
 
+
+void TSModel::AddSkeleton(const TSSkeleton& skeleton)
+{
+	this->skeleton = skeleton;
+}
+
+void TSModel::AddAnimation(const TSAnimation& animation)
+{
+	animations.push_back(animation);
+}
+
+
 bool TSModel::ExportToGLTF(const std::string& outputPath)
 {
 	tinygltf::TinyGLTF gltf;
@@ -430,6 +442,116 @@ bool TSModel::ExportToGLTF(const std::string& outputPath)
 			auto& node = model.nodes.emplace_back();
 			node.mesh = model.meshes.size() - 1;
 			node.name = model.meshes.back().name;
+		}
+	}
+
+	if (animations.size())
+	{
+		constexpr float FRAMERATE = 30.0f;
+		for (auto& tsAnim : animations)
+		{
+			if (tsAnim.tracks.size() == 0) continue;
+			auto& anim = model.animations.emplace_back();
+			anim.name = tsAnim.name;
+
+			std::vector<float> frametime;
+			std::vector<TSVector> positions;
+			std::vector<TSQuat> rotations;
+			//std::vector<float> scales;
+
+			frametime.reserve(tsAnim.IDs.size());
+			positions.reserve(tsAnim.IDs.size());
+			rotations.reserve(tsAnim.IDs.size());
+			for (size_t i = 0; i < tsAnim.IDs.size(); i++)
+			{
+				const auto& kf = tsAnim.tracks[0];
+				frametime.push_back((float)i / FRAMERATE);
+				positions.push_back({ kf.x, kf.y, kf.z });
+				rotations.push_back(kf.rotations[i]);
+				//scales.push_back(1.0f);
+			}
+
+			int frameTimeAccessorIndex = model.accessors.size();
+			{
+				auto& accessor = model.accessors.emplace_back();
+				accessor.bufferView = model.bufferViews.size();
+				accessor.name = "ANIM_FRAMETIME";
+				accessor.componentType = TINYGLTF_COMPONENT_TYPE_FLOAT;
+				accessor.type = TINYGLTF_TYPE_SCALAR;
+				accessor.count = frametime.size();
+
+				auto& bufferView = model.bufferViews.emplace_back();
+				bufferView.buffer = model.buffers.size();
+				bufferView.byteLength = frametime.size() * sizeof(float);
+				bufferView.byteStride = sizeof(float);
+
+				auto& buffer = model.buffers.emplace_back();
+				buffer.data.resize(frametime.size() * sizeof(float));
+				memcpy(buffer.data.data(), frametime.data(), frametime.size() * sizeof(float));
+				buffer.name = "ANIM_FRAMETIME";
+
+			}
+
+			int translationAccessorIndex = model.accessors.size();
+			{
+				auto& accessor = model.accessors.emplace_back();
+				accessor.bufferView = model.bufferViews.size();
+				accessor.name = "ANIM_TRANSLATION";
+				accessor.componentType = TINYGLTF_COMPONENT_TYPE_FLOAT;
+				accessor.type = TINYGLTF_TYPE_VEC3;
+				accessor.count = positions.size();
+
+				auto& bufferView = model.bufferViews.emplace_back();
+				bufferView.buffer = model.buffers.size();
+				bufferView.byteLength = positions.size() * sizeof(TSVector);
+				bufferView.byteStride = sizeof(TSVector);
+
+				auto& buffer = model.buffers.emplace_back();
+				buffer.data.resize(positions.size() * sizeof(TSVector));
+				memcpy(buffer.data.data(), positions.data(), positions.size() * sizeof(TSVector));
+				buffer.name = "ANIM_TRANSLATION";
+			}
+			int rotationAccessorIndex = model.accessors.size();
+			{
+				auto& accessor = model.accessors.emplace_back();
+				accessor.bufferView = model.bufferViews.size();
+				accessor.name = "ANIM_ROTATION";
+				accessor.componentType = TINYGLTF_COMPONENT_TYPE_FLOAT;
+				accessor.type = TINYGLTF_TYPE_VEC4;
+				accessor.count = rotations.size();
+
+				auto& bufferView = model.bufferViews.emplace_back();
+				bufferView.buffer = model.buffers.size();
+				bufferView.byteLength = rotations.size() * sizeof(TSQuat);
+				bufferView.byteStride = sizeof(TSQuat);
+
+				auto& buffer = model.buffers.emplace_back();
+				buffer.data.resize(rotations.size() * sizeof(TSQuat));
+				memcpy(buffer.data.data(), rotations.data(), rotations.size() * sizeof(TSQuat));
+				buffer.name = "ANIM_ROTATION";
+			}
+
+			auto AddSampler = [&](int outputTarget) -> int
+			{
+				auto& sampler = anim.samplers.emplace_back();
+				sampler.interpolation = "LINEAR";
+				sampler.input = frameTimeAccessorIndex;
+				sampler.output = outputTarget;
+				return anim.samplers.size() - 1;
+			};
+
+			auto& animChannelT = anim.channels.emplace_back();
+			animChannelT.sampler = AddSampler(translationAccessorIndex); //refers to sampler index in this animation object, always the first one
+			animChannelT.target_path = "translation";
+			animChannelT.target_node = 0;
+
+			auto& animChannelR = anim.channels.emplace_back();
+			animChannelR.sampler = AddSampler(rotationAccessorIndex); //refers to sampler index in this animation object, always the first one
+			animChannelR.target_path = "rotation";
+			animChannelR.target_node = 0;
+
+
+
 		}
 	}
 

@@ -152,5 +152,8 @@
     <ClInclude Include="src\Utility\memorywriter.h">
       <Filter>Source Files\Utility</Filter>
     </ClInclude>
+    <ClInclude Include="src\Tool\TS2Importer\TS2Types.h">
+      <Filter>Source Files\Tool\TS2Importer</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
